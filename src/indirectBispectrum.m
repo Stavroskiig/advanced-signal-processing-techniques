@@ -208,6 +208,6 @@ end
 contour(waxis,waxis,abs(bispectrum),4), grid on
 
 % Set the title and labels for the plot
-title('Bispectrum estimated via the indirect method - Rectangular window')
+%title('Bispectrum estimated via the indirect method - Rectangular window')
 xlabel('f1'), ylabel('f2')
 end

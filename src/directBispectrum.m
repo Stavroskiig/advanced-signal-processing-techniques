@@ -201,6 +201,6 @@ end
 contour(waxis,waxis,abs(bispectrum),4),grid on 
 
 % Set the title and labels for the plot
-title('Bispectrum estimated via the direct (FFT) method')
+%title('Bispectrum Estimation using the Direct Method')
 xlabel('f1'), ylabel('f2')
 end
