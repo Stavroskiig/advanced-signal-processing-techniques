@@ -107,7 +107,7 @@ for recordIndex = 1:numNonRedundantRecords
     windowSamples = windowSamples - mean(windowSamples);
     
     % Update the index for the next window
-    windowIndices = windowIndices + nadvance;
+    windowIndices = windowIndices + windowAdvance;
     
     % Loop over the lag values
     for lag = 0:maxLag
@@ -168,7 +168,7 @@ end
 cumulantComponent33  = cumulantComponent33 + diag(cumulantsMatrix(1, maxLag+1:-1:2)); 
 
 % Construct the final cumulants matrix by combining cumulantComponent33, cumulantComponent32, and cumulantComponent34
-cmat = [ [cumulantComponent33, cumulantComponent32, zeros(maxLag, 1)]; [ [cumulantComponent34; zeros(1, maxLag)] , cumulantsMatrix ] ]; 
+cumulantsMatrix = [ [cumulantComponent33, cumulantComponent32, zeros(maxLag, 1)]; [ [cumulantComponent34; zeros(1, maxLag)] , cumulantsMatrix ] ]; 
       
 %% Apply lag-domain window
 

@@ -13,13 +13,9 @@ k = 0:N-1;
 omegas = 2*pi*lambdas;
 
 % Generate the random phase offsets
-phi1 = 2*pi*rand;
-phi2 = 2*pi*rand;
-phi3 = phi1+phi2;
-phi4 = 2*pi*rand;
-phi5 = 2*pi*rand;
-phi6 = phi4+phi5;
-phis = [phi1 phi2 phi3 phi4 phi5 phi6]';
+phis = (2*pi*rand(6,1))';
+phis(3) = phis(1)+phis(2);
+phis(6) = phis(4)+phis(5);
 
 % Calculate the values of cos(omega_i * k + phi_i) for all i and k
 cos_values = zeros(6, N);
@@ -231,18 +227,14 @@ figure();
 
 for i=1:R
     % Generate the random phase offsets
-    phi1 = 2*pi*rand;
-    phi2 = 2*pi*rand;
-    phi3 = phi1+phi2;
-    phi4 = 2*pi*rand;
-    phi5 = 2*pi*rand;
-    phi6 = phi4+phi5;
-    phisNew = [phi1 phi2 phi3 phi4 phi5 phi6]';
+    phis = (2*pi*rand(6,1))';
+    phis(3) = phis(1)+phis(2);
+    phis(6) = phis(4)+phis(5);
     
     % Calculate the values of cos(omega_j * k + phi_j) for all j and k
     cos_values1 = zeros(6, N);
     for j = 1:6
-        cos_values1(j, :) = cos(omegas(j)*k + phisNew(j));
+        cos_values1(j, :) = cos(omegas(j)*k + phis(j));
     end
     
     % Sum the values of cos(omega_j * k + phi_j) for all j to get X[k]

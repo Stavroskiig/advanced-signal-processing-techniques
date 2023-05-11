@@ -1,4 +1,4 @@
-function Bspec = directBispectrum (X, fftLength, windowType, sampleSize, percentOverlap)
+function bispectrum = directBispectrum (X, fftLength, windowType, sampleSize, percentOverlap)
 %% Parameter Validation
 
 % Get the number of rows and columns of the input data matrix X
@@ -55,98 +55,152 @@ nAdvance = sampleSize - percentOverlap;
 numCols = fix( (numRows*numCols - percentOverlap) / nAdvance);
 
 
-%% 2D Window Creation
+%% Window Creation
+
+% Check if the windowType variable exists, otherwise assign a default value
 if (exist('windowType', 'var') ~= 1) 
     windowType = 5; 
 end
-[m,n] = size(windowType);
+
+% Get the size of the windowType variable
+[winRows, winCols] = size(windowType);
+
+% Assign the window variable based on the windowType value
 window = windowType;
 
-if (max(m,n) == 1)     % scalar: wind is size of Rao-Gabr window
-    winsize = windowType;
-    if (winsize < 0) 
-        winsize = 5; 
-    end        % the window length L
-    winsize = winsize - rem(winsize,2) + 1;  % make it odd
-    if (winsize > 1)
-        mwind   = fix (fftLength/winsize);            % the scale parameter M
-        lby2    = (winsize - 1)/2;
+% Check if the windowType is a scalar (indicating the size of Rao-Gabr window)
+if (max(winRows, winCols) == 1)
+    % Set the window size based on the windowType value
+    windowSize = windowType;
 
-        theta  = -lby2:lby2;
-        opwind = ones(winsize,1) * (theta .^2);       % w(m,n)=m^2
-        opwind = opwind + opwind' + theta' * theta;   % m^2 + n^2 + mn
-        opwind = 1 - (2*mwind/fftLength)^2 * opwind;       %
-        hex    = ones(winsize,1) * theta;             % m
+    % Check if winsize is less than 0, assign a default value
+    if (windowSize < 0) 
+        windowSize = 5; 
+    end
+
+    % Make winsize odd
+    windowSize = windowSize - rem(windowSize,2) + 1;
+
+    % Perform window creation if winsize is greater than 1
+    if (windowSize > 1)
+        scaleParam   = fix (fftLength / windowSize); % Scale parameter M
+        halfWindowSize    = (windowSize - 1) / 2;
+
+        % Create the window coefficients based on mathematical operations
+        theta  = -halfWindowSize:halfWindowSize;
+        opwind = ones(windowSize,1) * (theta .^2); % w(m,n)=m^2
+        opwind = opwind + opwind' + theta' * theta; % m^2 + n^2 + mn
+        opwind = 1 - (2*scaleParam/fftLength)^2 * opwind; 
+        hex    = ones(windowSize,1) * theta; 
         hex    = abs(hex) + abs(hex') + abs(hex+hex');
-        hex    = (hex < winsize);
+        hex    = (hex < windowSize);
         opwind = opwind .* hex;
-        opwind = opwind * (4 * mwind^2) / (7 * pi^2) ;
+        opwind = opwind * (4 * scaleParam^2) / (7 * pi^2) ;
     else
+        % Window size is 1, assign 1 as the window coefficient
         opwind = 1;
     end
 
-elseif (min(m,n) == 1)  % 1-D window passed: convert to 2-D
+% Check if the windowType is a 1D window passed as input
+elseif (min(winRows, winCols) == 1)
+    % Convert the 1D window to a 2D window
     window = window(:);
+
+    % Check if the 1D window has imaginary or negative components, if so, assign 1 as the window
     if (any(imag(window) ~= 0))
-        disp('1-D window has imaginary components: window ignored')
+        disp('1D window has imaginary components: window ignored')
         window = 1;
     end
     if (any(window < 0))
-        disp('1-D window has negative components: window ignored')
+        disp('1D window has negative components: window ignored')
         window = 1;
     end
-    lwind  = length(window);
-    windf  = [window(lwind:-1:2); window];  % the full symmetric 1-D
-    window = [window; zeros(lwind-1,1)];
-    opwind = (windf * windf').* hankel(flipud(window), window); % w(m)w(n)w(m+n)
-    winsize = length(window);
+    windowLength  = length(window);
+    fullSymmetricWindow  = [window(windowLength:-1:2); window];  % the full symmetric 1-D
+    window = [window; zeros(windowLength-1,1)];
+    opwind = (fullSymmetricWindow * fullSymmetricWindow').* hankel(flipud(window), window); % w(m)w(n)w(m+n)
+    windowSize = length(window);
 
-else                    % 2-D window passed: use directly
-    winsize = m;
-    if (m ~= n)
-        disp('2-D window is not square: window ignored')
+% Check if the windowType is a 2D window passed as input
+else
+    windowSize = winRows;
+
+    % Check if the 2D window is square and has odd length, otherwise assign 1 as the window
+    if (winRows ~= winCols)
+        disp('2D window is not square: window ignored')
         window = 1;
-        winsize = m;
+        windowSize = numRows;
     end
-    if (rem(m,2) == 0)
-        disp('2-D window does not have odd length: window ignored')
+    if (rem(winRows,2) == 0)
+        disp('2D window does not have odd length: window ignored')
         window = 1;
-        winsize = m;
+        windowSize = winRows;
     end
+
     opwind  = window;
 end
 
 %% Accumulate Triple Products
-Bspec    = zeros(fftLength,fftLength);
 
-mask = hankel(1:fftLength,[fftLength,1:fftLength-1] );   % the hankel mask (faster)
-locseg = (1:sampleSize)';
-for krec = 1:numCols
-    xseg   = X(locseg);
-    Xf     = fft(xseg-mean(xseg), fftLength)/sampleSize;
-    CXf    = conj(Xf);
-    Bspec  = Bspec + (Xf * Xf.') .*reshape(CXf(mask), fftLength, fftLength);
-    locseg = locseg + nAdvance;
+% Initialize the bispectrum matrix
+bispectrum = zeros(fftLength, fftLength);
+
+% Create a hankel mask for faster processing
+hankelMask = hankel(1:fftLength, [fftLength, 1:fftLength-1]);
+
+% Initialize the segment location
+segmentLocation = (1:sampleSize)';
+
+% Iterate over each column of the input data
+for columnIdx = 1:numCols
+    % Extract the segment of the input data
+    segment = X(segmentLocation);
+
+    % Compute the Fourier transform of the segment (normalized)
+    segmentFourier = fft(segment - mean(segment), fftLength) / sampleSize;
+
+    % Compute the complex conjugate of the Fourier transform
+    complexConjugate = conj(segmentFourier);
+
+    % Compute the outer product of the Fourier transform and its conjugate
+    % and accumulate it in the bispectrum matrix
+    bispectrum = bispectrum + (segmentFourier * segmentFourier.') .* reshape(complexConjugate(hankelMask), fftLength, fftLength);
+
+    % Update the segment location by advancing it
+    segmentLocation = segmentLocation + nAdvance;
 end
 
-Bspec = fftshift(Bspec)/(numCols);
+% Normalize the bispectrum by dividing it by the number of columns
+bispectrum = fftshift(bispectrum) / numCols;
 
 %% Frequency-Domain Smoothing
-if (winsize > 1)
-    lby2 = (winsize-1)/2;
-    Bspec = conv2(Bspec,opwind);
-    Bspec = Bspec(lby2+1:lby2+fftLength,lby2+1:lby2+fftLength);
+
+% Check if windowSize is greater than 1 for smoothing
+if (windowSize > 1)
+    halfWindowSize = (windowSize-1) / 2;
+
+    % Apply convolution with the window in the frequency domain
+    bispectrum = conv2(bispectrum, opwind);
+    
+    % Extract the central part of the smoothed bispectrum after convolution
+    bispectrum = bispectrum(halfWindowSize+1:halfWindowSize+fftLength,halfWindowSize+1:halfWindowSize+fftLength);
 end
 
-
 %% Contour Plot of Magnitude Bispectum
+
+% Compute the frequency axis values
 if (rem(fftLength,2) == 0)
+    % For even fftLength, use the appropriate frequency axis values
     waxis = (-fftLength/2:(fftLength/2-1))'/fftLength;
 else
+    % For odd fftLength, use the appropriate frequency axis values
     waxis = (-(fftLength-1)/2:(fftLength-1)/2)'/fftLength;
 end
 
-contour(waxis,waxis,abs(Bspec),4),grid on 
+% Plot the magnitude of the bispectrum using contour plot
+contour(waxis,waxis,abs(bispectrum),4),grid on 
+
+% Set the title and labels for the plot
 title('Bispectrum estimated via the direct (FFT) method')
 xlabel('f1'), ylabel('f2')
 end
