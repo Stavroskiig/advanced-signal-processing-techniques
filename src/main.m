@@ -41,7 +41,7 @@ xlabel("k")
 % Plot a smaller sample of our data for a clearer review.
 figure(figCounter)
 figCounter = figCounter + 1;
-plot(X(1:800))
+plot(X(1:200))
 title("Smaller Sample of X[k]")
 ylabel("X[k]")
 xlabel("k")
@@ -106,6 +106,12 @@ L = 64;
 % Split data
 subsetsX = reshape(X,[M,K]);
 
+% Compression factor for logarithmic scale
+compressionFactor = 30;
+
+% Frequency axis for bispectra
+freqAxis = linspace(-0.5,+0.5,1024);
+
 % a1) Indirect Method with Rectangular Window for K=32, M=256, L3=64
 figure(figCounter)
 figCounter = figCounter + 1;
@@ -117,6 +123,15 @@ plot([0.25,0.5],[0.25,0],'Color','#D95319');
 plot([0,0.5],[0,0],'Color','#D95319');
 title('Bispectrum Estimation using the Indirect Method with Rectangular Window');
 legend('Bispectrum','Primary Area');
+
+figure(figCounter);
+figCounter = figCounter + 1;
+C3 = abs(BispecInRec) / max(abs(BispecInRec(:)));
+C3 = log(1+compressionFactor*C3);
+C3 = imresize(C3,4,'bicubic');
+imagesc(freqAxis,freqAxis,C3); colorbar; grid on;
+title('Bispectrum Estimation using the Indirect Method with Rectangular Window');
+xlabel('f1(Hz)'); ylabel('f2(Hz)');
 
 % a2) Indirect Method with Parzen Window for K=32, M=256, L3=64
 figure(figCounter)
@@ -130,6 +145,14 @@ plot([0,0.5],[0,0],'Color','#D95319');
 title('Bispectrum Estimation using the Indirect Method with Parzen Window');
 legend('Bispectrum','Primary Area');
 
+figure(figCounter)
+figCounter = figCounter + 1;
+C2 = abs(BispecInParz) / max(abs(BispecInParz(:)));
+C2 = log(1+compressionFactor*C2);
+C2 = imresize(C2,4,'bicubic');
+imagesc(freqAxis,freqAxis,C2); colorbar; grid on;
+title('Bispectrum Estimation using the Indirect Method with Parzen Window');
+xlabel('f1(Hz)'); ylabel('f2(Hz)');
 
 % b) Direct Method for K=32, M=256, J=0
 J = 0;
@@ -145,6 +168,15 @@ plot([0.25,0.5],[0.25,0],'Color','#D95319');
 plot([0,0.5],[0,0],'Color','#D95319');
 title('Bispectrum Estimation using the Direct Method');
 legend('Bispectrum','Primary Area');
+
+figure(figCounter)
+figCounter = figCounter + 1;
+C1 = abs(bispecDir) / max(abs(bispecDir(:)));
+C1 = log(1+compressionFactor*C1);
+C1 = imresize(C1,4,'bicubic');
+imagesc(freqAxis,freqAxis,C1); colorbar; grid on;
+title('Bispectrum Estimation using the Direct Method');
+xlabel('f1(Hz)'); ylabel('f2(Hz)');
 
 %% Task 7a: Change Segment Length
 % i) K=16, M=512
@@ -166,6 +198,15 @@ plot([0,0.5],[0,0],'Color','#D95319');
 title('Bispectrum Estimation using the Indirect Method with Rectangular Window');
 legend('Bispectrum','Primary Area');
 
+figure(figCounter)
+figCounter = figCounter + 1;
+C4 = abs(bispecInRec1) / max(abs(bispecInRec1(:)));
+C4 = log(1+compressionFactor*C4);
+C4 = imresize(C4,4,'bicubic');
+imagesc(freqAxis,freqAxis,C4); colorbar; grid on;
+title('Bispectrum Estimation using the Indirect Method with Rectangular Window');
+xlabel('f1(Hz)'); ylabel('f2(Hz)');
+
 % Indirect Method with Parzen Window for K=16, M=512, L3=64
 figure(figCounter)
 figCounter = figCounter + 1;
@@ -178,6 +219,15 @@ plot([0,0.5],[0,0],'Color','#D95319');
 title('Bispectrum Estimation using the Indirect Method with Parzen Window');
 legend('Bispectrum','Primary Area');
 
+figure(figCounter)
+figCounter = figCounter + 1;
+C5 = abs(bispecInParz1) / max(abs(bispecInParz1(:)));
+C5 = log(1+compressionFactor*C5);
+C5 = imresize(C5,4,'bicubic');
+imagesc(freqAxis,freqAxis,C5); colorbar; grid on;
+title('Bispectrum Estimation using the Indirect Method with Parzen Window');
+xlabel('f1(Hz)'); ylabel('f2(Hz)');
+
 % Direct Method for K=16, M=512, J=0
 figure(figCounter)
 figCounter = figCounter + 1;
@@ -189,6 +239,15 @@ plot([0.25,0.5],[0.25,0],'Color','#D95319');
 plot([0,0.5],[0,0],'Color','#D95319');
 title('Bispectrum Estimation using the Direct Method');
 legend('Bispectrum','Primary Area');
+
+figure(figCounter)
+figCounter = figCounter + 1;
+C6 = abs(bispecDir1) / max(abs(bispecDir1(:)));
+C6 = log(1+compressionFactor*C6);
+C6 = imresize(C6,4,'bicubic');
+imagesc(freqAxis,freqAxis,C6); colorbar; grid on;
+title('Bispectrum Estimation using the Direct Method');
+xlabel('f1(Hz)'); ylabel('f2(Hz)');
 
 % ii) K=64, M=128
 K = 64;
@@ -209,6 +268,15 @@ plot([0,0.5],[0,0],'Color','#D95319');
 title('Bispectrum Estimation using the Indirect Method with Rectangular Window');
 legend('Bispectrum','Primary Area');
 
+figure(figCounter)
+figCounter = figCounter + 1;
+C7 = abs(bispecInRec2) / max(abs(bispecInRec2(:)));
+C7 = log(1+compressionFactor*C7);
+C7 = imresize(C7,4,'bicubic');
+imagesc(freqAxis,freqAxis,C7); colorbar; grid on;
+title('Bispectrum Estimation using the Indirect Method with Rectangular Window');
+xlabel('f1(Hz)'); ylabel('f2(Hz)');
+
 % Indirect Method with Parzen Window for K=64, M=128, L3=64
 figure(figCounter)
 figCounter = figCounter + 1;
@@ -221,6 +289,15 @@ plot([0,0.5],[0,0],'Color','#D95319');
 title('Bispectrum Estimation using the Indirect Method with Parzen Window');
 legend('Bispectrum','Primary Area');
 
+figure(figCounter)
+figCounter = figCounter + 1;
+C8 = abs(bispecInParz2) / max(abs(bispecInParz2(:)));
+C8 = log(1+compressionFactor*C8);
+C8 = imresize(C8,4,'bicubic');
+imagesc(freqAxis,freqAxis,C8); colorbar; grid on;
+title('Bispectrum Estimation using the Indirect Method with Parzen Window');
+xlabel('f1(Hz)'); ylabel('f2(Hz)');
+
 % Direct Method for K=64, M=128, J=0
 figure(figCounter)
 figCounter = figCounter + 1;
@@ -232,6 +309,15 @@ plot([0.25,0.5],[0.25,0],'Color','#D95319');
 plot([0,0.5],[0,0],'Color','#D95319');
 title('Bispectrum Estimation using the Direct Method');
 legend('Bispectrum','Primary Area');
+
+figure(figCounter)
+figCounter = figCounter + 1;
+C9 = abs(bispecDir2) / max(abs(bispecDir2(:)));
+C9 = log(1+compressionFactor*C9);
+C9 = imresize(C9,4,'bicubic');
+imagesc(freqAxis,freqAxis,C9); colorbar; grid on;
+title('Bispectrum Estimation using the Direct Method');
+xlabel('f1(Hz)'); ylabel('f2(Hz)');
 
 %% Task 7b: Realization and Mean Value Comparison
 K = 32;
@@ -332,6 +418,15 @@ title('Mean Bispectrum Estimation using the Indirect Method with Rectangular Win
 xlabel('f1');
 ylabel('f2');
 
+figure(figCounter)
+figCounter = figCounter + 1;
+C10 = abs(meanC3In1) / max(abs(meanC3In1(:)));
+C10 = log(1+compressionFactor*C10);
+C10 = imresize(C10,4,'bicubic');
+imagesc(freqAxis,freqAxis,C10); colorbar; grid on;
+title('Mean Bispectrum Estimation using the Indirect Method with Rectangular Window');
+xlabel('f1(Hz)'); ylabel('f2(Hz)');
+
 % Plot the bispectrum using indirect method with Parzen window
 figure(figCounter)
 figCounter = figCounter + 1;
@@ -341,6 +436,15 @@ title('Mean Bispectrum Estimation using the Indirect Method with Parzen Window')
 xlabel('f1');
 ylabel('f2');
 
+figure(figCounter)
+figCounter = figCounter + 1;
+C11 = abs(meanC3In2) / max(abs(meanC3In2(:)));
+C11 = log(1+compressionFactor*C11);
+C11 = imresize(C11,4,'bicubic');
+imagesc(freqAxis,freqAxis,C11); colorbar; grid on;
+title('Mean Bispectrum Estimation using the Indirect Method with Parzen Window');
+xlabel('f1(Hz)'); ylabel('f2(Hz)');
+
 % Plot the bispectrum using direct method
 figure(figCounter)
 figCounter = figCounter + 1;
@@ -349,3 +453,12 @@ grid on;
 title('Mean Bispectrum Estimation using the Direct Method');
 xlabel('f1');
 ylabel('f2');
+
+figure(figCounter)
+figCounter = figCounter + 1;
+C12 = abs(meanC3Dir) / max(abs(meanC3Dir(:)));
+C12 = log(1+compressionFactor*C12);
+C12 = imresize(C12,4,'bicubic');
+imagesc(freqAxis,freqAxis,C12); colorbar; grid on;
+title('Mean Bispectrum Estimation using the Direct Method');
+xlabel('f1(Hz)'); ylabel('f2(Hz)');
